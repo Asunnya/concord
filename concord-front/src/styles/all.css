@@ -1,0 +1,112 @@
+
+
+.navbar-concord{
+    background-color: var(--GreenConcord, #399556);
+
+}
+
+.img-icon {
+    width: 161px;
+    height: 156px;
+    padding: 8px;
+    margin-left: 16px;
+}
+
+.title {
+    color: #000;
+    font-family: Roboto;
+    font-size: 57px;
+    font-style: normal;
+    font-weight: 700;
+    line-height: 100%;
+    letter-spacing: -0.25px;
+    text-align: left;
+    text-transform: uppercase;
+    padding: 16px;
+}
+
+.concord-stl {
+    color: var(--GreenConcord, #B1F5C8);
+}
+
+.subtitle {
+    color: #000;
+    text-align: right;
+    font-family: Roboto;
+    font-size: 24px;
+    font-style: normal;
+    font-weight: 700;
+    line-height: 122%;
+    padding: 24px;
+    
+}
+
+.ideal-stl{
+    color: var(--GreenConcord, #B1F5C8);
+}
+
+.waiting-stl {
+    color:#399556
+}
+
+.title-waiting {
+    color: #000;
+    font-family: Roboto;
+    font-size: 50px;
+    font-style: normal;
+    font-weight: 700;
+    line-height: 64px; /* 112.281% */
+    letter-spacing: -0.25px;
+    padding: 1rem;
+    margin-bottom: 2rem;
+}
+
+.container-waiting-room, .container-meeting-room {
+    margin: 2rem;
+    padding: 2rem;
+    border: #000 1px solid;
+    border-radius: 50px;
+}
+
+.btn-waiting-room {
+    width: 100%;
+    background-color: #399556;
+    
+}
+
+
+#ou {
+    color: #000;
+    font-family: Roboto;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 700;
+    line-height: 150%;
+    letter-spacing: 0.5px;
+}
+
+.icons-meeting {
+    text-align: center;
+    font-size: 2rem;
+    height: 100%;
+    padding: 8px;
+    margin-left: 16px;
+}
+
+.name-meeting {
+    color: #000;
+    font-family: Roboto;
+    font-size: 24px;
+    font-style: normal;
+    font-weight: 700;
+    line-height: 122%;
+    letter-spacing: 0.5px;
+    text-align: right;
+    padding: 16px;
+    border: #000 1px solid;
+    border-radius: 50px;
+    -webkit-border-radius: 50px;
+    -moz-border-radius: 50px;
+    -ms-border-radius: 50px;
+    -o-border-radius: 50px;
+}
