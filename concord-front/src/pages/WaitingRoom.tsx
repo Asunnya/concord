@@ -1,7 +1,13 @@
 import { MDBInput } from "mdb-react-ui-kit";
 import { MDBBtn } from "mdb-react-ui-kit";
+import { useState } from "react";
 
-const WaitingRoom = () => {
+const WaitingRoom = ({handleCreatingMeeting, handleJoinMeeting}) => {
+
+  const [name, setName] = useState("")
+  const [room, setRoom] = useState("")
+
+
   return (
     <>
       <section className="waiting-room container-waiting-room">
@@ -15,12 +21,16 @@ const WaitingRoom = () => {
                   <MDBInput
                     className="input-waitingroom"
                     label="Insira seu nome"
+                    onChange={(e) => setName(e.target.value)}
                     id="form1"
                     type="text"
                   />
                 </div>
                 <div className="col-7">
-                  <MDBBtn  rounded className="btn-waiting-room" color="success">Criar uma sala</MDBBtn>
+                  <MDBBtn  onClick={( )=> {
+                    handleCreatingMeeting(name);
+                  }}
+                   rounded className="btn-waiting-room" color="success">Criar uma sala</MDBBtn>
                 </div>
               </div>
               <div className="row p-2 text-center">
@@ -34,13 +44,14 @@ const WaitingRoom = () => {
                 <div className="col-5">
                   <MDBInput
                     className="btn-waiting-room"
+                    onChange={(e) => setRoom(e.target.value)}
                     label="Insira o código da sala"
                     id="form1"
                     type="text"
                   />
                 </div>
                 <div className="col-7">
-                  <MDBBtn rounded  className="btn-waiting-room"  color="success">Entrar em uma sala existente</MDBBtn>
+                  <MDBBtn rounded onClick={()=> handleJoinMeeting(room, name)} className="btn-waiting-room"  color="success">Entrar em uma sala existente</MDBBtn>
                 </div>
               </div>
             </div>
