@@ -16,13 +16,23 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, re_path
-from user_video import views
+from user_video import views as usv
+from meeting import views as mv
+from meeting import server_meeting as sv
+from socket_concord import views as scv
+
+
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    re_path(r'^user_video/', views.user_videos_list),
-    re_path(r'^user_video/([0-9])$', views.user_video_detail),
-    re_path(r'^create_user/', views.create_user_video),
+    path('socket.io/', scv.start_server),
+    path('user_video/', usv.user_videos_list),
+    path('user_video/create/', usv.create_user_video),
+    path('user_video/getById/<int:pk>', usv.user_video_detail),
+    path('meeting/', mv.meeting_list),
+    path('meeting/create/', mv.create_meeting),
+    path('meeting/getByRoomCode/<str:room_code>', mv.get_by_room_code),
+    path('meeting/update/<int:pk>', mv.update_meeting),
 ]
 
 

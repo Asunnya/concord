@@ -40,6 +40,8 @@ INSTALLED_APPS = [
     'rest_framework',
     'corsheaders',
     'user_video',
+    'meeting',
+    'socket_concord'
 ]
 
 MIDDLEWARE = [

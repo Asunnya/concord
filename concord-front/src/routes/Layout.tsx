@@ -1,12 +1,14 @@
-import { Outlet } from "react-router-dom";
+
 import Header from "../components/Header";
 import Footer from "../components/Footer";
+import Concord from "../pages/ConcordPage";
+
 
 const Layout = () => {
   return (
     <>
       <Header />
-      <Outlet />
+      <Concord />
       <Footer />
     </>
   );
