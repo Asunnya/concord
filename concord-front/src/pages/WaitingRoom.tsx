@@ -35,17 +35,22 @@ function WaitingRoom({ handleStartMeeting }: any) {
     };
 
     const {data: data_meeting} = await axios.post("http://localhost:8000/meeting/create/", meeting);
-
+    console.log("starting...")
     setName(user.username);
     setRoom(roomAutoCreated);
     handleStartMeeting(data_user, data_meeting);
   };
 
-  const handleJoinMeeting = async ({ name, room }: FieldValues) => {
-    const {data: data_meeting} = await axios.get(`http://localhost:8000/meeting/getByRoomCode/${room}`);
+  const handleJoinMeeting = async ({ name }: FieldValues) => {
+    console.log("joining...")
+    console.log(room)
+
+    const { data: data_meeting } = await axios.get(`http://localhost:8000/meeting/getByRoomCode/${room}`);
     const user: UserVideo = {
       username: name,
     };
+
+
     const {data: data_user} = await axios.post("http://localhost:8000/user_video/create/", user);
     data_meeting.guest_user = data_user.user_video_id;
     const {data: data_update_meeting} = await axios.put(`http://localhost:8000/meeting/update/${data_meeting.meeting_id}`, data_meeting);
@@ -105,7 +110,7 @@ function WaitingRoom({ handleStartMeeting }: any) {
                   <MDBBtn
                     disabled={room === "" || name === ""}
                     rounded
-                    onClick={() => handleJoinMeeting({ name, room })}
+                    onClick={() => handleJoinMeeting({ name })}
                     className="btn-waiting-room"
                     color="success"
                   >

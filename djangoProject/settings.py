@@ -9,11 +9,13 @@ https://docs.djangoproject.com/en/4.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.2/ref/settings/
 """
-
+import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+ASGI_APPLICATION = 'djangoProject.asgi.application'
 
 
 # Quick-start development settings - unsuitable for production
@@ -25,23 +27,26 @@ SECRET_KEY = 'django-insecure-i0yr#+!n@1$)87zb_ocn)vr4&-ku^7=41zl_1q1ic&ws)w8^!p
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 CORS_ORIGIN_ALLOW_ALL = True
-ALLOWED_HOSTS = []
-
+ALLOWED_HOSTS = ['*']	
 
 # Application definition
 
 INSTALLED_APPS = [
+    'daphne',
+    'channels',
+    'rest_framework',
+    'corsheaders', 
+    'user_video',
+    'meeting',
+    'video_signal',
+
+
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'rest_framework',
-    'corsheaders',
-    'user_video',
-    'meeting',
-    'socket_concord'
 ]
 
 MIDDLEWARE = [
@@ -53,7 +58,6 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'corsheaders.middleware.CorsMiddleware',
-    'django.middleware.common.CommonMiddleware',
 ]
 
 ROOT_URLCONF = 'djangoProject.urls'
@@ -61,7 +65,7 @@ ROOT_URLCONF = 'djangoProject.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates']
+        'DIRS': [BASE_DIR / 'concord-front']
         ,
         'APP_DIRS': True,
         'OPTIONS': {
@@ -75,7 +79,6 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'djangoProject.wsgi.application'
 
 
 # Database
@@ -125,7 +128,16 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 
+STATICSFILES_DIRS = [os.path.join(BASE_DIR, 'concord-front')]
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels.layers.InMemoryChannelLayer'
+    }
+}

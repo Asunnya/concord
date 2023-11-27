@@ -14,6 +14,8 @@
     "@material/web": "^1.0.1",
     "@tanstack/react-query": "^5.8.4",
     "@tanstack/react-query-devtools": "^5.8.4",
+    "simple-peer": "^9.11.1",
+    "@types/simple-peer": "^9.11.8",
     "@vitejs/plugin-react": "^4.2.0",
     "bootstrap": "^5.3.2",
     "mdb-react-ui-kit": "^7.0.0",
@@ -23,7 +25,6 @@
     "react-dom": "^18.2.0",
     "react-hook-form": "^7.48.2",
     "react-router-dom": "^6.19.0",
-    "socket.io-client": "^4.7.2",
     "tailwindcss": "^3.3.5",
     "vite": "^5.0.0"
   },
