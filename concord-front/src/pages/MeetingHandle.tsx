@@ -1,8 +1,11 @@
-import { useEffect, useRef, useState } from "react";
+import { Component, useEffect, useRef, useState } from "react";
 import Meeting from "../models/Meeting";
 import UserVideo from "../models/UserVideo";
 import { MDBBtn, MDBIcon } from "mdb-react-ui-kit";
 import Peer from "simple-peer";
+import { all } from "axios";
+import { set } from "react-hook-form";
+import VideoComponent from "./VideoComponent";
 
 function MeetingHandle({ user,
     meeting,
@@ -12,46 +15,73 @@ function MeetingHandle({ user,
     meeting: Meeting;
     handleEndMeeting: any;
 }) {
-
     const localStreamRef = useRef<HTMLVideoElement>(null);
     const remoteStreamRef = useRef<HTMLVideoElement>(null);
     const [isMicOn, setIsMicOn] = useState(true);
     const [isCameraOn, setIsCameraOn] = useState(true);
+
     const [websocket, setWebsocket] = useState<any>();
     const [otherUser, setOtherUser] = useState<any>();
+
+
     const [loading, setLoading] = useState(true);
     const [usersConnected, setUsersConnected] = useState<[]>([]);
-    const [peers] = useState<any[]>([]);
+    const [allPeersCreated, setAllPeersCreated] = useState<any>([]);
+
+    const [stream] = useState<any>();
+    const [peersOks, setPeersOk] = useState<any>([]);
+
 
     useEffect(() => {
-        webSocketCreate();       
+        webSocketCreate();
     }, []);
 
- 
+    
+
+    console.log("peersOks", peersOks)
+    console.log("allPeersCreated", allPeersCreated)
+    console.log("usersConnected", usersConnected)
+    console.log("stream", stream)
+    console.log("otherUser", otherUser)
+    console.log("websocket", websocket)
+
+    console.log("localStreamRef", localStreamRef)
+    console.log("remoteStreamRef", remoteStreamRef)
 
     const CreatePeer = ({ localUserId, remoteUserId, localUserStream = null }: { localUserId: any; remoteUserId: any; localUserStream?: any }): any => {
+
+        console.log("create peer")
         const peer = new Peer(
             {
                 initiator: true,
                 trickle: false,
-                stream: localUserStream
+                stream: localUserStream,
             }
         );
 
 
+
         peer.on('signal', (data: any) => {
-           websocket.send(JSON.stringify({
-                type: 'offer',
-                from: localUserId,
-                to: remoteUserId,
-                offer: data,
-           }));
+            websocket.send(
+                JSON.stringify({
+                    type: 'offer',
+                    from: localUserId,
+                    to: remoteUserId,
+                    offer: data,
+                }));
         });
+     
+
+        allPeersCreated.push(peer);
+
+
         return peer;
     };
 
 
     const addPeer = ({ localUserId, remoteUserId, receivedOffer, localUserStream = null }: { localUserId: any; remoteUserId: any; receivedOffer?: any; localUserStream?: any }): any => {
+
+        console.log("add peer")
         const peer = new Peer(
             {
                 initiator: false,
@@ -63,35 +93,52 @@ function MeetingHandle({ user,
         peer.signal(receivedOffer);
 
         peer.on('signal', (data: any) => {
-           websocket.send(JSON.stringify({
+            websocket.send(JSON.stringify({
                 type: 'answer',
                 from: localUserId,
                 to: remoteUserId,
                 answer: data,
-           }));
+            }));
         });
 
+      
+
+        allPeersCreated.push(peer);
         return peer;
     };
 
 
-    const sendStreamToPeer = (stream: any) => { 
-        
-        usersConnected.forEach((user1) => {
-            if (user1 !== user.username) {
-              
-                const peer = CreatePeer({ localUserId: user.username, remoteUserId: user1, localUserStream: stream });
-                peers.push(peer);
-                
-                peer.on('stream', (stream: any) => {
-                    remoteStreamRef.current!.srcObject = stream;
+    const sendStreamToPeer = (userCurrent: any, stream: any) => {
+        const ppeers: any = [];
+        console.log("send stream to peer")
+        usersConnected.forEach((otherUser1: any) => {
+            if (otherUser1 !== userCurrent) {
+                const peer = CreatePeer({
+                    localUserId: userCurrent,
+                    remoteUserId: otherUser1,
+                    localUserStream: stream,
+                });
+
+                console.log("send stream to peer")
+                ppeers.push(
+                    {
+                        peerId: otherUser1,
+                        peer: peer,
+                    }
+                );
+
+
+                peer.on('stream', function (remoteStream: any) {
+                    remoteStreamRef!.current!.srcObject = remoteStream;
                 });
             }
-        })
 
+            setPeersOk(ppeers);
+        });
+        
     }
 
-    
+
 
     const webSocketCreate = () => {
         const WEBSOCKETURL = 'ws://localhost:8000' + '/video-chat/';
@@ -99,8 +146,8 @@ function MeetingHandle({ user,
         setWebsocket(socket);
 
         socket.onopen = () => {
-           
             setLoading(false);
+
             socket.send(JSON.stringify({
                 'type': 'join',
                 'from': user.username,
@@ -113,51 +160,53 @@ function MeetingHandle({ user,
             const data = JSON.parse(e.data);
             switch (data.type) {
                 case 'join':
-                   
+                    
                     setUsersConnected(data.data.users);
-
-
                     if (data.from === user.username) {
                         navigator.mediaDevices.getUserMedia({
                             video: true,
                             audio: true
-                          }).then((stream) => {
+                        }).then((stream) => {
                             localStreamRef.current!.srcObject = stream;
-                            sendStreamToPeer(stream);
-                          }).catch((e) => {
+                            sendStreamToPeer(user.username, stream);
+                        }).catch((e) => {
                             console.log(e.message)
-                          })
-                    } else if (data.from !== user.username) {
-                       const otherUser = data.username;
+                        })
+                    }
+                    if (data.from !== user.username) {
+                        const otherUser = data.from;
                         setOtherUser(otherUser);
-                       console.log(`${otherUser} joined the room`);
+                        console.log(`${otherUser} joined the room`);
                     }
                     break;
                 case 'offer':
-                    if (data.to == user.username) {
+                    if (data.to === user.username) {
                         console.log('offer receive')
-                        const peer2 = addPeer( { 
-                            localUserId: user.username, 
-                            remoteUserId: data.from, 
-                            receivedOffer: data.offer, 
-                            localUserStream: localStreamRef.current!.srcObject 
-                        } );
-                        peers.push(peer2)
-                        console.log("teset")
-                        peer2.on('stream', (stream: any) => {
-                            remoteStreamRef.current!.srcObject = stream;
+                        const peer2 = addPeer({
+                            localUserId: user.username,
+                            remoteUserId: data.from,
+                            receivedOffer: data.offer,
+                            localUserStream: localStreamRef.current!.srcObject
                         });
+
+                        setPeersOk((peersOks: any) => [...peersOks, {
+                            peerId: data.from,
+                            peer: peer2
+                        }]);
+
+
                     }
                     break;
                 case 'answer':
-                    if (data.to == user.username) {
+                    if (data.to === user.username) {
                         console.log('answer receive')
-                        const peer = peers.find((p) => p.remoteUserId === data.from);
+                        const peer = peersOks.find((p: any) => p.peerId === data.from);
                         peer.signal(data.answer);
                     }
                     break;
                 case 'disconnected':
                     if (data.from !== user.username) {
+
                         handleEndMeeting();
                         console.log(`${data.from} left the room`);
                     }
@@ -171,22 +220,47 @@ function MeetingHandle({ user,
 
     }
 
-    const handleMicBtn = () => {
-        if (localStreamRef.current) {
-            // localStreamRef.current.srcObject?.getAudioTracks().forEach((track) => {
-            //     track.enabled = !track.enabled;
-            // });
+    Component.prototype.componentWillUnmount = () => {
+        websocket.send(JSON.stringify({
+            'type': 'disconnected',
+            'from': user.username,
+            'room': meeting.room_code
+        }));
+
+        peersOks.forEach((element: any) => {
+            element.destroy();
+        });
+        if (websocket) {
+            setWebsocket(null);
         }
+        if (stream) {
+            stream.getTracks().forEach((track: any) => {
+                track.stop();
+            });
+        }
+
+        setUsersConnected([]);
+        setPeersOk([]);
+
+
+
+        websocket.close();
+    }
+
+    const handleMicBtn = () => {
+        const stream = localStreamRef.current!.srcObject as MediaStream;
+        if (!stream.getAudioTracks()[0]) return
+        stream.getAudioTracks()[0].enabled = !stream.getAudioTracks()[0].enabled;
+        setIsMicOn(false);
     }
 
     const handleCameraBtn = () => {
-        if (localStreamRef.current) {
-            // localStreamRef.current.srcObject?.getVideoTracks().forEach((track) => {
-            //     track.enabled = !track.enabled;
-            // });
-        }
-    }
+        const stream = localStreamRef.current!.srcObject as MediaStream;
+        if (!stream.getVideoTracks()[0]) return
+        stream.getVideoTracks()[0].enabled = !stream.getVideoTracks()[0].enabled;
+        setIsCameraOn(false);
 
+    }
 
     if (loading) return <div>Loading...</div>;
 
@@ -198,13 +272,15 @@ function MeetingHandle({ user,
                         <h1>SALA:{meeting.room_code} </h1>
                     </div>
                     <div className="row">
-                        <div className="col-6 video-user text-end">
-                            <video id="preview" ref={localStreamRef} autoPlay playsInline muted />
+                        <div className="col-6 video-user text-left">
+                            <video id="preview" ref={localStreamRef} autoPlay playsInline muted style={{width: "50%", height: "50%"}}/>
                             <p className="name-meeting">{user.username}</p>
                         </div>
                         <div className="col-6 video-friend text-end">
-                            <video id="preview" ref={remoteStreamRef} autoPlay playsInline />
+                            <div className={"video-grid"}>
+                            <video id="preview" ref={remoteStreamRef} autoPlay playsInline muted style={{width: "50%", height: "50%"}}/>
                             <p className="name-meeting">{otherUser}</p>
+                            </div>
                         </div>
                     </div>
                     <div className="row">

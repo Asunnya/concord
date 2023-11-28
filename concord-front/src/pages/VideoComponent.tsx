@@ -1,42 +1,51 @@
 import classNames from "classnames";
-import { useEffect, useRef } from "react";
+import React from "react";
+import { Component, useEffect, useRef } from "react";
 
-function VideoComponent(props: any) {
-  const video = useRef<HTMLVideoElement>(null);
-  const srcObject = props.srcObject;
-  const src = props.src;
-  const style = props.style;
 
-  const className = classNames(
-    "video-component",
-    props.className
-  );
-  function handleCanPlay() {
-    if (!video.current) return <video></video>;
-    video.current.play();
-  }
-
-  useEffect(() => {
-    if (srcObject && video.current) {
-      video.current.srcObject = srcObject;
-    }
-  });
-
-  return (
-    <>
-      <video
-        style={style}
-        ref={video}
-        onCanPlay={handleCanPlay}
-        playsInline
-        className={className}
-        autoPlay={true}
-        src={src}
-        id="video-component"
-      />
-    </>
-  );
+interface props {
+  video: any;
+  user: any;
+  peer: any;
 }
 
+class VideoComponent extends Component<props> {
 
-export default VideoComponent
+  constructor(props: props) {
+    super(props);
+  }
+
+  componentDidMount = () => {
+    const { video, user, peer } = this.props;
+
+    if (peer && user) {
+
+      peer.on("stream", (stream: any) => {
+        video.srcObject = stream;
+        video.play();
+      });
+
+    }
+
+  }
+
+  render(): React.ReactNode {
+    const { video, user, peer } = this.props;
+
+    return (
+      <div>
+        <video
+          className={"video-friend"}
+          ref={video}
+          autoPlay
+          playsInline
+          style={{ width: "35%", height: "35%" }}
+        />
+        <p className="name-meeting">{user}</p>
+      </div>
+    );
+  }
+
+}
+
+export default VideoComponent;
